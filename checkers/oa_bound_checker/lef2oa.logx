@@ -1,9 +1,10 @@
 *****************************************************************************
 Tool:		lef2oa        	22.04.054
 *****************************************************************************
-Running: lef2oa -lib DesignLib -dataModel 3 -lef ""
-Started: Mon Feb 19 19:02:59 2024 (Hostname: eeapps02.seas.ucla.edu)
+Running: lef2oa -lib DesignLib -dataModel 3 -lef "../../NangateOpenCellLibrary.lef"
+Started: Wed Feb 21 01:36:27 2024 (Hostname: eeapps04.seas.ucla.edu)
+WARNING: (OALEFDEF-10018): No default library definition file found. A default lib.defs file will be created in the current working directory. If this is not desired use the -libDefFile option to specify the location of an existing lib.defs file to use.
 Finished lef2oa
-Time elapsed:	0.01 seconds
-Peak VM:	700416 bytes
-Messages:	0 errors, 0 warnings
+Time elapsed:	2.39 seconds
+Peak VM:	1212416 bytes
+Messages:	0 errors, 1 warning

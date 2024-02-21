@@ -1,0 +1,10 @@
+*.invs
+*.cmd*
+*.log*
+*.map
+*.rs*
+*.rpt
+
+output/
+timingReports/
+*.dat/

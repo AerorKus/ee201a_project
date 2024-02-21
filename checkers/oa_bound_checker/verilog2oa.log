@@ -1,0 +1,10 @@
+*****************************************************************************
+Tool:		verilog2oa    	22.04.054
+*****************************************************************************
+Running: verilog2oa -lib DesignLib -refLibs "DesignLib" -dataModel 3 -verilog ""
+Started: Mon Feb 19 19:02:59 2024 (Hostname: eeapps02.seas.ucla.edu)
+ERROR: (OAVLG-40001): The file "À„" could not be opened. Check the path and check whether the file and directory permissions are correct.
+Finished verilog2oa
+Time elapsed:	0.10 seconds
+Peak VM:	532480 bytes
+Messages:	1 error, 0 warnings

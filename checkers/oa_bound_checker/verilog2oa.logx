@@ -2,9 +2,9 @@
 Tool:		verilog2oa    	22.04.054
 *****************************************************************************
 Running: verilog2oa -lib DesignLib -refLibs "DesignLib" -dataModel 3 -verilog "../../output/s1494_postrouting.v"
-Started: Wed Feb 21 01:36:30 2024 (Hostname: eeapps04.seas.ucla.edu)
+Started: Wed Feb 21 22:32:22 2024 (Hostname: eeapps02.seas.ucla.edu)
 INFO: (OAVLG-40068): The top module is "s1494_bench".
 Finished verilog2oa
-Time elapsed:	0.22 seconds
+Time elapsed:	1.54 seconds
 Peak VM:	2379776 bytes
 Messages:	0 errors, 0 warnings

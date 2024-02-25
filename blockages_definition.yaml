@@ -12,9 +12,9 @@
 # example blockage listed below. You should replace these coordinates with the ones you are using.
 blockage: [
     {
-        "x1": 0,
-        "y1": 0,
-        "x2": 50,
-        "y2": 50
+        "x1": 10,
+        "y1": 6,
+        "x2": 11,
+        "y2": 24
     }
 ]

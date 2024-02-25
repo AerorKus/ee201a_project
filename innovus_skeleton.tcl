@@ -52,11 +52,87 @@ report_timing -early -nworst  10 -net > ${OUTPUTDIR}/${DNAME}_init_hold.tarpt
 setMaxRouteLayer 4
 
 # Specify floorplan dimensions and placement utilization
-set UTIL 0.90
+set UTIL 0.88
 floorplan -r 1.0 $UTIL 6 6 6 6
 
+#blockages
+set position 40
+set width 1.0
+set layer_blk 1
 
-# Define global power nets
+set design_bbox_llx [dbGet top.fPlan.box_llx]
+set design_bbox_lly [dbGet top.fPlan.box_lly]
+set design_bbox_urx [dbGet top.fPlan.box_urx]
+set design_bbox_ury [dbGet top.fPlan.box_ury]
+set core_bbox_llx [dbGet top.fPlan.coreBox_llx]
+set core_bbox_lly [dbGet top.fPlan.coreBox_lly]
+set core_bbox_urx [dbGet top.fPlan.coreBox_urx]
+set core_bbox_ury [dbGet top.fPlan.coreBox_ury]
+
+set routeblk_pos [expr ($design_bbox_urx - $design_bbox_llx) * ($position/100.0)]
+set placeblk_pos [expr (($core_bbox_urx - $core_bbox_llx) * ($position/100.0) + $core_bbox_llx)]
+
+set placeblk_llx [expr ($placeblk_pos - $width/2)]
+set placeblk_lly $core_bbox_lly
+set placeblk_urx [expr $placeblk_pos + $width/2]
+set placeblk_ury $core_bbox_ury
+
+set routeblk_llx [expr $routeblk_pos - $width/2]
+set routeblk_lly $design_bbox_lly
+set routeblk_urx [expr $routeblk_pos + $width/2]
+set routeblk_ury $design_bbox_ury
+
+# createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal$layer_blk -name routeblk
+createPlaceBlockage -type hard -box $routeblk_llx $placeblk_lly $routeblk_urx $placeblk_ury -name placeblk
+
+createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal1 -name routeblk
+createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal2 -name routeblk
+createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 -name routeblk
+createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal4 -name routeblk
+
+# switch layer_blk {
+#    1 {
+#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal1 -name routeblk
+#    }
+#    2 {
+#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal2 -name routeblk
+#    }
+#    3 {
+#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 -name routeblk
+#    }
+#    4 {
+#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal4 -name routeblk
+#    }
+#    5 {
+#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal1 metal2 -name routeblk
+#    }
+#    6 {
+#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal1 metal3 -name routeblk
+#    }
+#    7 {
+#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal1 metal4 -name routeblk
+#    }
+#    8 {
+#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal2 metal3 -name routeblk
+#    }
+#    9 {
+#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal2 metal4 -name routeblk
+#    }
+#    10 {
+#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 metal4 -name routeblk
+#    }
+#    10 {
+#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 metal4 -name routeblk
+#    }
+#    10 {
+#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 metal4 -name routeblk
+#    }
+#    10 {
+#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 metal4 -name routeblk
+#    }
+# }
+
+# Define global power nets 
 globalNetConnect VDD -type pgpin -pin VDD -inst * -module {}
 globalNetConnect VSS -type pgpin -pin VSS -inst * -module {}
 

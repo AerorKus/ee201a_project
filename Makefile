@@ -11,6 +11,10 @@ YAML = blockages_definition.yaml
 default:
 	innovus -nowin < innovus_skeleton.tcl
 
+test:
+	innovus -nowin < test.tcl
+
+
 info:
 	@echo "./$(PERF) $(LEF) $(DEF) $(VERILOG)"
 	@echo "./$(STRIP) ../../$(LEF) ../../$(DEF) ../../$(VERILOG) ../../$(YAML)"

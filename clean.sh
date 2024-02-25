@@ -9,4 +9,7 @@ rm *.cmd*
 rm *.log*
 rm streamOut.map
 rm -rf timingReports
-rm -rf output
+rm -rf output/
+rm .*.rs.fp
+rm .*.rs.fp.spr
+clear

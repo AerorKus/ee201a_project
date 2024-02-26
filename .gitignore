@@ -4,6 +4,7 @@
 *.map
 *.rs*
 *.rpt
+.nfs*
 
 output/
 timingReports/

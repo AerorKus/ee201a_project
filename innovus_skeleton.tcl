@@ -56,9 +56,14 @@ set UTIL 0.88
 floorplan -r 1.0 $UTIL 6 6 6 6
 
 #blockages
-set position 40
+set position 50
 set width 1.0
-set layer_blk 1
+
+set layer_metal(0) 0
+set layer_metal(1) 0
+set layer_metal(2) 1
+set layer_metal(3) 1
+set layer_cnt 4
 
 set design_bbox_llx [dbGet top.fPlan.box_llx]
 set design_bbox_lly [dbGet top.fPlan.box_lly]
@@ -82,55 +87,32 @@ set routeblk_lly $design_bbox_lly
 set routeblk_urx [expr $routeblk_pos + $width/2]
 set routeblk_ury $design_bbox_ury
 
-# createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal$layer_blk -name routeblk
 createPlaceBlockage -type hard -box $routeblk_llx $placeblk_lly $routeblk_urx $placeblk_ury -name placeblk
 
-createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal1 -name routeblk
-createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal2 -name routeblk
-createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 -name routeblk
-createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal4 -name routeblk
+for { set a 0}  {$a < $layer_cnt} {incr a} {
+    if { $layer_metal(0) == 1 && $layer_cnt >= 1} {
+        createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal1 -name routeblk
+    }
+    if { $layer_metal(1) == 1 && $layer_cnt >= 2} {
+        createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal2 -name routeblk
+    }
+    if { $layer_metal(2) == 1 && $layer_cnt >= 3} {
+        createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 -name routeblk
+    }
+    if { $layer_metal(3) == 1 && $layer_cnt >= 4} {
+        createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal4 -name routeblk
+    }
+}
 
-# switch layer_blk {
-#    1 {
-#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal1 -name routeblk
-#    }
-#    2 {
-#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal2 -name routeblk
-#    }
-#    3 {
-#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 -name routeblk
-#    }
-#    4 {
-#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal4 -name routeblk
-#    }
-#    5 {
-#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal1 metal2 -name routeblk
-#    }
-#    6 {
-#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal1 metal3 -name routeblk
-#    }
-#    7 {
-#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal1 metal4 -name routeblk
-#    }
-#    8 {
-#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal2 metal3 -name routeblk
-#    }
-#    9 {
-#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal2 metal4 -name routeblk
-#    }
-#    10 {
-#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 metal4 -name routeblk
-#    }
-#    10 {
-#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 metal4 -name routeblk
-#    }
-#    10 {
-#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 metal4 -name routeblk
-#    }
-#    10 {
-#         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 metal4 -name routeblk
-#    }
+# set languages(0) Tcl
+# set languages(1) "C Language"
+# for { set index 0 }  { $index < [array size languages] }  { incr index } {
+#    puts "languages($index) : $languages($index)"
 # }
+
+for { set a 10}  {$a < 20} {incr a} {
+   puts "value of a: $a"
+}
 
 # Define global power nets 
 globalNetConnect VDD -type pgpin -pin VDD -inst * -module {}

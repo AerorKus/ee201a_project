@@ -9,6 +9,8 @@ VERILOG = output/s1494_postrouting.v
 YAML = blockages_definition.yaml 
 
 default:
+	python3 a.py
+in:
 	innovus -nowin < innovus_skeleton.tcl
 
 test:

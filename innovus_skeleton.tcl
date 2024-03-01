@@ -56,14 +56,20 @@ set UTIL 0.88
 floorplan -r 1.0 $UTIL 6 6 6 6
 
 #blockages
-set position 50
 set width 1.0
-
-set layer_metal(0) 0
-set layer_metal(1) 0
-set layer_metal(2) 1
-set layer_metal(3) 1
 set layer_cnt 4
+
+set counter 0
+set fp [open "data" r]
+while { [gets $fp data] >= 0 } {
+    if {$counter == 0} {set position $data}
+    if {$counter == 1} {set layer_metal(0) $data}
+    if {$counter == 2} {set layer_metal(1) $data}
+    if {$counter == 3} {set layer_metal(2) $data}
+    if {$counter == 4} {set layer_metal(3) $data}
+    incr counter
+}
+
 
 set design_bbox_llx [dbGet top.fPlan.box_llx]
 set design_bbox_lly [dbGet top.fPlan.box_lly]

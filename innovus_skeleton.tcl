@@ -44,10 +44,6 @@ init_design -setup _default_view_ -hold _default_view_
 setAnalysisMode -analysisType onChipVariation -cppr both
 setDesignMode -process 45
 
-# Report initial setup and hold time, post-synthesis but before physical design
-report_timing -check_type setup -nworst  10 -net > ${OUTPUTDIR}/${DNAME}_init_setup.tarpt
-report_timing -early -nworst  10 -net > ${OUTPUTDIR}/${DNAME}_init_hold.tarpt
-
 # DON'T CHANGE: Limit number of metal/routing layers
 setMaxRouteLayer 4
 
@@ -117,7 +113,7 @@ set fp_placeblk [open "placeblk" w+]
 puts $fp_placeblk "$routeblk_llx\n$placeblk_lly\n$routeblk_urx\n$placeblk_ury"
 close $fp_placeblk
 
-# Define global power nets 
+# Define global power nets
 globalNetConnect VDD -type pgpin -pin VDD -inst * -module {}
 globalNetConnect VSS -type pgpin -pin VSS -inst * -module {}
 
@@ -227,6 +223,8 @@ saveNetlist -excludeLeafCell ${OUTPUTDIR}/${DNAME}_postrouting.v
 summaryReport -noHtml -outfile ${OUTPUTDIR}/summary.rpt
 reportGateCount -level 10 -outfile ${OUTPUTDIR}/gate_count.rpt
 checkDesign -io -netlist -physicalLibrary -powerGround -tieHilo -timingLibrary -floorplan -place -noHtml -outfile ${OUTPUTDIR}/design.rpt
+
+saveDesign design_file
 
 puts "*************************************************************"
 puts "* Innovus script finished"

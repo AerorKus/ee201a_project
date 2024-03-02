@@ -44,10 +44,16 @@ subprocess.run([f"innovus -nowin < innovus_skeleton.tcl"], shell=True)
 with open('output/s1494.drc.rpt') as fp_drc:
   if 'No DRC violations were found' in fp_drc.read():
           print("No DRC Violations")
-          status_drc = 1
+          status_drc = 0
+  else:
+     status_drc = 1 
   
 with open("output/summary.rpt") as fp_summ:
     data = fp_summ.readlines()
+
+with open("output/s1494_postrouting_setup.tarpt") as fp_setup:
+    data_setup = fp_setup.readlines()
+
 
 #Total Wire Length
 for twl_str in data:
@@ -64,6 +70,30 @@ for area_str in data:
     area_data = area_data_tmp[1].split("%")
     if(area_data[0] == '87.687'):  
       print(area_data[0])
+#setup slack
+
+for setup_str in data_setup:
+  if (setup_str.startswith("= Slack Time                    ")):
+    setup_data_temp= setup_str.split("                    ")
+    setup_data = setup_data_temp[1].split("\n")
+    if(setup_data[0] == '0.481'):  
+      print(setup_data[0])
+
+#FOM
+#weight
+alpha = 1
+beta = 1
+gamma = 1
+sigma = 1
+epsilon = 1
+#figures
+layer_num = metal1 + metal2 + metal3 + metal4
+setup_slack = float(setup_data[0])
+drc_violation = status_drc
+success_place = 1
+
+score = alpha*layer_num - beta*setup_slack - gamma*drc_violation + epsilon*success_place
+print(score)
 
 
 f_data = open("data", "w")

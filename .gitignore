@@ -10,3 +10,5 @@ output/
 timingReports/
 *.dat/
 data
+routeblk
+placeblk

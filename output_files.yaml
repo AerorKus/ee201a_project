@@ -1,0 +1,9 @@
+# example output file
+# your script needs to generate this file.
+# Alternatively, keep this file fixed and update the output files themselves in your script
+# these filepaths are relative to the project root.
+# DO NOT CHANGE THE KEYS OR SYNTAX
+
+best_verilog: "best_postrouting.v"
+best_blockages: "best_blockages.yaml"
+best_design_dat_folder: "design_file.dat"

@@ -69,8 +69,6 @@ while { [gets $fp data] >= 0 } {
     if {$counter == 4} {set layer_metal(3) $data}
     incr counter
 }
-
-
 set design_bbox_llx [dbGet top.fPlan.box_llx]
 set design_bbox_lly [dbGet top.fPlan.box_lly]
 set design_bbox_urx [dbGet top.fPlan.box_urx]
@@ -110,15 +108,14 @@ for { set a 0}  {$a < $layer_cnt} {incr a} {
     }
 }
 
-# set languages(0) Tcl
-# set languages(1) "C Language"
-# for { set index 0 }  { $index < [array size languages] }  { incr index } {
-#    puts "languages($index) : $languages($index)"
-# }
+#print for blockage.yaml
+set fp_routeblk [open "routeblk" w+]
+puts $fp_routeblk "$routeblk_llx\n$routeblk_lly\n$routeblk_urx\n$routeblk_ury"
+close $fp_routeblk
 
-for { set a 10}  {$a < 20} {incr a} {
-   puts "value of a: $a"
-}
+set fp_placeblk [open "placeblk" w+]
+puts $fp_placeblk "$routeblk_llx\n$placeblk_lly\n$routeblk_urx\n$placeblk_ury"
+close $fp_placeblk
 
 # Define global power nets 
 globalNetConnect VDD -type pgpin -pin VDD -inst * -module {}

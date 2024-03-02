@@ -1,0 +1,17 @@
+# this is an example config file that should serve as input for your script.
+# DO NOT CHANGE THE KEYS OR SYNTAX, OR WE CANT RUN YOUR CODE WITH OUR DESIGN.
+
+verilog_file: "s1494_synth.v"
+top_name: "s1494_bench"
+sdc_file: "s1494.sdc"
+lef_file: "NangateOpenCellLibrary.lef"
+
+# the configs listed above are required so that you can set up your innovus skeleton.
+# for example, using the innovus skeleton for s1494:
+# the first few lines are:
+# #Setup design config
+# set netlist s1494_synth.v
+# set top_cell s1494_bench
+# set sdc s1494.sdc
+# set lef NangateOpenCellLibrary.lef
+# your script should populate those lines with the correct values from this config file.

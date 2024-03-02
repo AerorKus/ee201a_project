@@ -10,10 +10,18 @@
 set netlist 
 set top_cell 
 set sdc design.sdc
-set lef 
+set lef NangateOpenCellLibrary.lef
 set DNAME design
 set OUTPUTDIR checker_output
-set def 
+
+set x1_r
+set y1_r
+set x2_r
+set y2_r
+set x1_p
+set y1_p
+ser x2_p
+set y2_p
 
 # Initialize design
 suppressMessage TECHLIB-436
@@ -30,7 +38,7 @@ init_design -setup _default_view_ -hold _default_view_
 setAnalysisMode -analysisType onChipVariation -cppr both
 setDesignMode -process 45
 
-defIn $def
+restoreDesign [file dirname [file normalize [info script]]]/design_file.dat $top_cell
 
 # Extract RC delays
 setExtractRCMode -engine postRoute
@@ -56,17 +64,30 @@ summaryReport -noHtml -outfile ${OUTPUTDIR}/summary.rpt
 reportGateCount -level 10 -outfile ${OUTPUTDIR}/gate_count.rpt
 checkDesign -io -netlist -physicalLibrary -powerGround -tieHilo -timingLibrary -floorplan -place -noHtml -outfile ${OUTPUTDIR}/design.rpt
 
-puts "*************************************************************"
-puts "* Innovus script finished"
-puts "*"
-puts "* Results:"
-puts "* --------"
-puts "* Layout:  ${OUTPUTDIR}/${DNAME}.gds"
-puts "* Netlist: ${OUTPUTDIR}/${DNAME}_postrouting.v"
-puts "* Timing:  ${OUTPUTDIR}/${DNAME}_postrouting_setup.tarpt"
-puts "* DRC:     ${OUTPUTDIR}/${DNAME}.drc.rpt"
-puts "*"
-puts "* Type 'exit' to quit"
-puts "*"
-puts "*************************************************************"
+set qb [dbQuery -area $x1_p $y1_p $x2_p $y2_p -objType {inst}]
 
+# foreach
+set output_file "checker_output/blockage_return.txt"
+set file_handle [open $output_file "w"]
+
+set count 0
+foreach instance $qb {
+    set layer [get_db $instance .name]
+    puts $file_handle $layer
+}
+
+close $file_handle
+
+
+set qq [dbQuery -area $x1_r $y1_r $x2_r $y2_r -objType {wire}]
+
+# foreach
+set output_file "checker_output/layer_return.txt"
+set file_handle [open $output_file "w"]
+
+foreach wire $qq {
+    set layer [get_db $wire .layer]
+    puts $file_handle $layer
+}
+
+close $file_handle

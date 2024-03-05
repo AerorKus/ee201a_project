@@ -12,4 +12,3 @@ rm -rf timingReports
 rm -rf output/
 rm .*.rs.fp
 rm .*.rs.fp.spr
-clear

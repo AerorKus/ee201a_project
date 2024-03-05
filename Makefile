@@ -15,6 +15,8 @@ in:
 test:
 	@innovus -nowin < test.tcl
 
+test_py:
+	@@python3 test.py
 
 info:
 	@echo "./$(PERF) $(VERILOG) $(YAML)" 

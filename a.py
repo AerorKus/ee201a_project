@@ -3,12 +3,28 @@ import subprocess
 import os
 import time
 
+start = time.time() #start timer
+
 if os.path.exists("data"):
   os.remove("data")
   f_data = open("data", "x")
 else:
   f_data = open("data", "x")
 f_data.close()
+
+if os.path.exists("score"):
+  os.remove("score")
+  f_score = open("score", "x")
+else:
+  f_score = open("score", "x")
+f_score.close()
+
+if os.path.exists("max_score"):
+  os.remove("max_score")
+  f_max_score = open("max_score", "x")
+else:
+  f_max_score = open("max_score", "x")
+f_max_score.close()
 
 if os.path.exists("routeblk"):
   os.remove("routeblk")
@@ -25,21 +41,22 @@ else:
 f_placeblk.close()
 
 def metal_layer(select):
-    if(select == 0):
-      return 0, 0, 0, 0
-    if(select == 1):
-      return 0, 0, 0, 1
-    if(select == 2):
-      return 0, 0, 1, 0
-    if(select == 3):
-      return 0, 0, 1, 1
-    if(select == 4):
-      return 0, 1, 0, 0
-    if(select == 5):
-      return 0, 1, 0, 1
-    if(select == 6):
-      return 0, 1, 1, 0
+    #organized to run more aggressive route blk first
     if(select == 7):
+      return 0, 0, 0, 0
+    if(select == 4):
+      return 0, 0, 0, 1
+    if(select == 5):
+      return 0, 0, 1, 0
+    if(select == 1):
+      return 0, 0, 1, 1
+    if(select == 6):
+      return 0, 1, 0, 0
+    if(select == 2):
+      return 0, 1, 0, 1
+    if(select == 3):
+      return 0, 1, 1, 0
+    if(select == 0):
       return 0, 1, 1, 1
     # if(select == 8):
     #   return 1, 0, 0, 0
@@ -58,11 +75,10 @@ def metal_layer(select):
     # if(select == 15):
     #   return 1, 1, 1, 1
  
-def block_test(position):
-  i = 0
-  while i <= 7:
-    metal1, metal2, metal3, metal4 = metal_layer(i)
-    i += 1
+def block_test(metal1, metal2, metal3, metal4):
+  position = 40
+  max_score = 0
+  while position <= 60:
     f_data = open("data", "w")
     f_data.write(str(position) + '\n')
     f_data.write(str(metal1) + '\n')
@@ -70,7 +86,7 @@ def block_test(position):
     f_data.write(str(metal3) + '\n')
     f_data.write(str(metal4) + '\n')
     f_data.close()
-
+    position += 1 #detail of blk
     subprocess.run([f"innovus -nowin < innovus_skeleton.tcl"], shell=True)
 
     with open('output/s1494.drc.rpt') as fp_drc:
@@ -118,12 +134,34 @@ def block_test(position):
     #figures
     layer_num = metal1 + metal2 + metal3 + metal4
     setup_slack = float(setup_data[0])
+    twl = float(twl_data[0])
     drc_violation = status_drc
     success_place = 1
 
-    score = alpha*layer_num - beta*setup_slack - gamma*drc_violation + epsilon*success_place
-    print(score)
-
+    score = alpha*layer_num + beta*setup_slack - gamma*drc_violation - sigma*twl + epsilon*success_place
+    end = time.time()
+    time_elapsed = end - start
+    
+    f_score = open("score", "a")
+    f_score.write(str(time_elapsed) + ": " + "Score = " + str(score) + '\n')
+    f_score.close
+    
+    if(time_elapsed > 5400):
+      print("time_elapsed = " + str(end-start) + "s")
+      break
+    if(score > max_score):
+      max_score = score
+      max_score_position = position
+      max_score_metal1 = metal1
+      max_score_metal2 = metal2
+      max_score_metal3 = metal3
+      max_score_metal4 = metal4
+      
+      f_max_score = open("max_score", "a")
+      f_max_score.write(str(max_score) + '\n')
+      f_max_score.close
+    
+    # end of function
     f_data = open("data", "w")
     f_data.truncate(0)
     f_data.seek(0)
@@ -132,20 +170,17 @@ def block_test(position):
     fp_summ.close()
     subprocess.run([f"./clean.sh"], shell=True)
     subprocess.run([f"./clean_checkers.sh"], shell=True)
-
-    return score
+  return max_score, max_score_position, max_score_metal1, max_score_metal2, max_score_metal3, max_score_metal4
 
 #main
-  
-min_score = block_test(50)
-score = block_test(60)
-if(score < min_score):
-    min_score = score
+i = 0
+max_score = 0
+while i <= 7:
+  metal1, metal2, metal3, metal4 = metal_layer(i)
+  score = block_test(metal1, metal2, metal3, metal4)
+  if(score > max_score):
+    max_score = score
+  i+=1
+  print("min score = " + str(max_score))
 
-
-
-
-
-#end of program
-os.remove("data")
 

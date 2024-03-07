@@ -16,11 +16,10 @@ test:
 	@innovus -nowin < test.tcl
 
 test_py:
-	@@python3 test.py
+	@python3 test.py
 
 info:
 	@echo "./$(PERF) $(VERILOG) $(YAML)" 
 
 clean:
-	./clean_checkers.sh
-	./clean.sh
+	@./clean.sh

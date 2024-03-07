@@ -45,7 +45,7 @@ setAnalysisMode -analysisType onChipVariation -cppr both
 setDesignMode -process 45
 
 # DON'T CHANGE: Limit number of metal/routing layers
-setMaxRouteLayer 4
+setMaxRouteLayer 6
 
 # Specify floorplan dimensions and placement utilization
 set UTIL 0.88
@@ -53,7 +53,7 @@ floorplan -r 1.0 $UTIL 6 6 6 6
 
 #blockages
 set width 1.0
-set layer_cnt 4
+set layer_cnt 6
 
 set counter 0
 set fp [open "data" r]
@@ -63,6 +63,8 @@ while { [gets $fp data] >= 0 } {
     if {$counter == 2} {set layer_metal(1) $data}
     if {$counter == 3} {set layer_metal(2) $data}
     if {$counter == 4} {set layer_metal(3) $data}
+    if {$counter == 5} {set layer_metal(4) $data}
+    if {$counter == 6} {set layer_metal(5) $data}
     incr counter
 }
 set design_bbox_llx [dbGet top.fPlan.box_llx]
@@ -100,6 +102,12 @@ for { set a 0}  {$a < $layer_cnt} {incr a} {
         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal3 -name routeblk
     }
     if { $layer_metal(3) == 1 && $layer_cnt >= 4} {
+        createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal4 -name routeblk
+    }
+    if { $layer_metal(4) == 1 && $layer_cnt >= 5} {
+        createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal4 -name routeblk
+    }
+    if { $layer_metal(5) == 1 && $layer_cnt >= 6} {
         createRouteBlk -box $routeblk_llx $routeblk_lly $routeblk_urx $routeblk_ury -layer metal4 -name routeblk
     }
 }

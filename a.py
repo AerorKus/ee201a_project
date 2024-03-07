@@ -18,6 +18,9 @@ if os.path.exists("score"):
 else:
   f_score = open("score", "x")
 f_score.close()
+f_score = open("score", "w")
+f_score.write("Score\n")
+f_score.close()
 
 if os.path.exists("max_score"):
   os.remove("max_score")
@@ -39,45 +42,20 @@ if os.path.exists("placeblk"):
 else:
   f_placeblk = open("placeblk", "x")
 f_placeblk.close()
-
-def metal_layer(select):
-    #organized to run more aggressive route blk first
-    if(select == 7):
-      return 0, 0, 0, 0
-    if(select == 4):
-      return 0, 0, 0, 1
-    if(select == 5):
-      return 0, 0, 1, 0
-    if(select == 1):
-      return 0, 0, 1, 1
-    if(select == 6):
-      return 0, 1, 0, 0
-    if(select == 2):
-      return 0, 1, 0, 1
-    if(select == 3):
-      return 0, 1, 1, 0
-    if(select == 0):
-      return 0, 1, 1, 1
-    # if(select == 8):
-    #   return 1, 0, 0, 0
-    # if(select == 9):
-    #   return 1, 0, 0, 1
-    # if(select == 10):
-    #   return 1, 0, 1, 0
-    # if(select == 11):
-    #   return 1, 0, 1, 1
-    # if(select == 12):
-    #   return 1, 1, 0, 0
-    # if(select == 13):
-    #   return 1, 1, 0, 1
-    # if(select == 14):
-    #   return 1, 1, 1, 0
-    # if(select == 15):
-    #   return 1, 1, 1, 1
  
-def block_test(metal1, metal2, metal3, metal4):
+def metal_layer(data):
+    metal6 = (int(data) & 1) >> 0
+    metal5 = (int(data) & 2) >> 1
+    metal4 = (int(data) & 4) >> 2
+    metal3 = (int(data) & 8) >> 3
+    metal2 = (int(data) & 16) >> 4
+    metal1 = (int(data) & 32) >> 5
+    return metal1, metal2, metal3, metal4, metal5, metal6
+
+
+def block_test(metal1, metal2, metal3, metal4, metal5, metal6):
   position = 40
-  max_score = 0
+  max_score = -10000
   while position <= 60:
     f_data = open("data", "w")
     f_data.write(str(position) + '\n')
@@ -85,10 +63,14 @@ def block_test(metal1, metal2, metal3, metal4):
     f_data.write(str(metal2) + '\n')
     f_data.write(str(metal3) + '\n')
     f_data.write(str(metal4) + '\n')
+    f_data.write(str(metal5) + '\n')
+    f_data.write(str(metal6) + '\n')
     f_data.close()
     position += 1 #detail of blk
-    subprocess.run([f"innovus -nowin < innovus_skeleton.tcl"], shell=True)
-
+    done = subprocess.Popen([f"innovus -nowin < innovus_skeleton.tcl"], shell=True)
+    done.wait()
+    print("done subprocess")
+      
     with open('output/s1494.drc.rpt') as fp_drc:
       if 'No DRC violations were found' in fp_drc.read():
         print("No DRC Violations")
@@ -123,6 +105,7 @@ def block_test(metal1, metal2, metal3, metal4):
         setup_data_temp= setup_str.split("                    ")
         setup_data = setup_data_temp[1].split("\n")
         print(setup_data[0])
+        break
 
     #FOM
     #weight
@@ -132,7 +115,7 @@ def block_test(metal1, metal2, metal3, metal4):
     sigma = 1
     epsilon = 1
     #figures
-    layer_num = metal1 + metal2 + metal3 + metal4
+    layer_num = metal1 + metal2 + metal3 + metal4 + metal5 + metal6
     setup_slack = float(setup_data[0])
     twl = float(twl_data[0])
     drc_violation = status_drc
@@ -141,14 +124,11 @@ def block_test(metal1, metal2, metal3, metal4):
     score = alpha*layer_num + beta*setup_slack - gamma*drc_violation - sigma*twl + epsilon*success_place
     end = time.time()
     time_elapsed = end - start
-    
+    print("score FOM" + str(score))
     f_score = open("score", "a")
     f_score.write(str(time_elapsed) + ": " + "Score = " + str(score) + '\n')
     f_score.close
     
-    if(time_elapsed > 5400):
-      print("time_elapsed = " + str(end-start) + "s")
-      break
     if(score > max_score):
       max_score = score
       max_score_position = position
@@ -156,6 +136,8 @@ def block_test(metal1, metal2, metal3, metal4):
       max_score_metal2 = metal2
       max_score_metal3 = metal3
       max_score_metal4 = metal4
+      max_score_metal5 = metal5
+      max_score_metal6 = metal6
       
       f_max_score = open("max_score", "a")
       f_max_score.write(str(max_score) + '\n')
@@ -168,19 +150,51 @@ def block_test(metal1, metal2, metal3, metal4):
     f_data.close()
     fp_drc.close()
     fp_summ.close()
-    subprocess.run([f"./clean.sh"], shell=True)
-    subprocess.run([f"./clean_checkers.sh"], shell=True)
-  return max_score, max_score_position, max_score_metal1, max_score_metal2, max_score_metal3, max_score_metal4
+    done = subprocess.Popen([f"./clean.sh"], shell=True)
+    done.wait()
+    # done = subprocess.Popen([f"./clean_checkers.sh"], shell=True)
+    # done.wait()
+    #out of time 1hr 30mins
+    # if(time_elapsed > 5000):
+    if(time_elapsed > 60):
+      print("time_elapsed = " + str(end-start) + "s")
+      stop_time = 1
+      return stop_time, max_score, max_score_position, max_score_metal1, max_score_metal2, max_score_metal3, max_score_metal4, max_score_metal5, max_score_metal6
+    else:
+      stop_time = 0
+  return stop_time, max_score, max_score_position, max_score_metal1, max_score_metal2, max_score_metal3, max_score_metal4, max_score_metal5, max_score_metal6
 
 #main
-i = 0
-max_score = 0
-while i <= 7:
-  metal1, metal2, metal3, metal4 = metal_layer(i)
-  score = block_test(metal1, metal2, metal3, metal4)
+i = 31 #6 layers but not blocking metal1
+max_score = -10000
+while i > 0:
+  metal1, metal2, metal3, metal4, metal5, metal6 = metal_layer(i)
+  stop_time, score, score_position, score_metal1, score_metal2, score_metal3, score_metal4, score_metal5, score_metal6 = block_test(metal1, metal2, metal3, metal4, metal5, metal6)
   if(score > max_score):
     max_score = score
-  i+=1
-  print("min score = " + str(max_score))
+    max_score_position = score_position
+    max_score_metal1 = score_metal1
+    max_score_metal2 = score_metal2
+    max_score_metal3 = score_metal3
+    max_score_metal4 = score_metal4
+    max_score_metal5 = score_metal5
+    max_score_metal6 = score_metal6
+    f_data = open("data", "w")
+    f_data.write(str(max_score_position) + '\n')
+    f_data.write(str(max_score_metal1) + '\n')
+    f_data.write(str(max_score_metal2) + '\n')
+    f_data.write(str(max_score_metal3) + '\n')
+    f_data.write(str(max_score_metal4) + '\n')
+    f_data.write(str(max_score_metal5) + '\n')
+    f_data.write(str(max_score_metal6) + '\n')
+    f_data.close()
+  i-=1
+  print("max score = " + str(max_score))
+  if(stop_time == 1):
+    break
+
+done = subprocess.Popen([f"innovus -nowin < innovus_skeleton.tcl"], shell=True)
+done.wait()
+
 
 

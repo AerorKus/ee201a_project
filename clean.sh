@@ -12,3 +12,5 @@ rm -rf timingReports
 rm -rf output/
 rm .*.rs.fp
 rm .*.rs.fp.spr
+rm -rf checker_output
+rm combined_checker_output.txt

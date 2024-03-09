@@ -58,36 +58,37 @@ x2_place = 0
 y2_place = 0
 
 blkg_type = ""
-with open(blockage_fpath, 'r') as file:
-    for line in file:
-        if line.startswith("#"):
-            continue
-        if "place_blockage" in line:
-            blkg_type = "place"
-            continue
-        if "route_blockage" in line:
-            blkg_type = "route"
-            continue        
-        if "x1" in line:
-            if blkg_type == "place":
-                x1_place = float(line.split(":")[1][:-2].strip())
-            if blkg_type == "route":
-                x1_route = float(line.split(":")[1][:-2].strip())
-        if "y1" in line:
-            if blkg_type == "place":
-                y1_place = float(line.split(":")[1][:-2].strip())
-            if blkg_type == "route":
-                y1_route = float(line.split(":")[1][:-2].strip())
-        if "x2" in line:
-            if blkg_type == "place":
-                x2_place = float(line.split(":")[1][:-2].strip())
-            if blkg_type == "route":
-                x2_route = float(line.split(":")[1][:-2].strip())
-        if "y2" in line:
-            if blkg_type == "place":
-                y2_place = float(line.split(":")[1][:-2])
-            if blkg_type == "route":
-                y2_route = float(line.split(":")[1][:-2])
+if blockage_check:
+    with open(blockage_fpath, 'r') as file:
+        for line in file:
+            if line.startswith("#"):
+                continue
+            if "place_blockage" in line:
+                blkg_type = "place"
+                continue
+            if "route_blockage" in line:
+                blkg_type = "route"
+                continue        
+            if "x1" in line:
+                if blkg_type == "place":
+                    x1_place = float(line.split(":")[1][:-1].strip())
+                if blkg_type == "route":
+                    x1_route = float(line.split(":")[1][:-1].strip())
+            if "y1" in line:
+                if blkg_type == "place":
+                    y1_place = float(line.split(":")[1][:-1].strip())
+                if blkg_type == "route":
+                    y1_route = float(line.split(":")[1][:-1].strip())
+            if "x2" in line:
+                if blkg_type == "place":
+                    x2_place = float(line.split(":")[1][:-1].strip())
+                if blkg_type == "route":
+                    x2_route = float(line.split(":")[1][:-1].strip())
+            if "y2" in line:
+                if blkg_type == "place":
+                    y2_place = float(line.split(":")[1][:-1])
+                if blkg_type == "route":
+                    y2_route = float(line.split(":")[1][:-1])
 
 
 # determine top module from verilog file
@@ -109,6 +110,7 @@ with open(skeleton_path, 'r') as file:
     lines = file.readlines()
     lines = replace_line(lines, 9, f"set netlist {verilog_fpath}\n")
     lines = replace_line(lines, 10, f"set top_cell {top_module}\n")
+    lines = replace_line(lines, 11, f"set sdc {top_module}.sdc\n")
     lines = replace_line(lines, 16, f"set x1_r {x1_route}\n")
     lines = replace_line(lines, 17, f"set y1_r {y1_route}\n")
     lines = replace_line(lines, 18, f"set x2_r {x2_route}\n")
@@ -134,6 +136,11 @@ my_print("Innovus setup complete with:")
 my_print(f"    Verilog: {verilog_fpath}")
 if blockage_check:
     my_print(f"    Blockage file: {blockage_fpath}")
+    my_print("Place blockage setup:")
+    my_print("    x1:",x1_place,"y1:",y1_place,"x2:",x2_place,"y2:",y2_place)
+    my_print("Route blockage setup:")
+    my_print("    x1:",x1_route,"y1:",y1_route,"x2:",x2_route,"y2:",y2_route)
+
 time.sleep(1)
 if blockage_check:
     my_print("Running Innovus to extract performance and strip information...")
@@ -172,7 +179,7 @@ with open("./checker_output/design_postrouting_setup.tarpt", 'r') as file:
     slack = ""
     float_slack = -1
     for line in lines:
-        if "= Slack Time                    " in line:
+        if "= Slack Time                   " in line:
             slack = line.split(" ")[-1]
             float_slack = float(slack)
             if float_slack < 0:
@@ -190,7 +197,7 @@ with open("./checker_output/design_postrouting_hold.tarpt", 'r') as file:
     slack = ""
     float_slack = -1
     for line in lines:
-        if "  Slack Time                    " in line:
+        if "  Slack Time                   " in line:
             slack = line.split(" ")[-1]
             float_slack = float(slack)
             if float_slack < 0:
@@ -238,6 +245,12 @@ with open("./checker_output/summary.rpt", 'r') as file:
         if "Total metal4 wire length:" in line:
             m4 = line.split()[-2].strip()
             my_print(f" M4 wire length: {m4} um")
+        if "Total metal5 wire length:" in line:
+            m5 = line.split()[-2].strip()
+            my_print(f" M5 wire length: {m5} um")
+        if "Total metal6 wire length:" in line:
+            m6 = line.split()[-2].strip()
+            my_print(f" M6 wire length: {m6} um")
         if "Total wire length:" in line:
             total = line.split()[-2].strip()
             my_print(f" Total wire length: {total} um")
@@ -271,7 +284,7 @@ if blockage_check:
                 continue
             my_print(" PLACE VIOLATION:",line.strip())
         if count > 5:
-            my_print(f" Skipping my_printing remaining {count-5} placement violations...")
+            my_print(f" Skipping printing remaining {count-5} placement violations...")
         if count == 0:
             my_print(" No place violations found.")
     time.sleep(1)
@@ -286,14 +299,19 @@ if blockage_check:
     for i in range(len(layer_arr)):
         if layer_arr[i] > 0:
             my_print(f" Metal Layer {i+1} has {layer_arr[i]} violations")
+    
+    # if every element in layer_arr is 0, then no route violations
+    if all(x == 0 for x in layer_arr):
+        my_print(" No route violations found. This indicates that absolutely NO nets are crossing your blockage area on any layer.")
+        my_print(" This should not happen - we only expect blockage up to a point. Something is wrong.")
     # check if any layers have 0 violations, and my_print the first layer that has 0 violations
     # we want the largest layer from 0 to 8 with no violations to be my_printed
-    for i in range(len(layer_arr)):
-        if layer_arr[i] == 0:
-            continue
-        else:
-            my_print(" This means your stitching (and route blockage) has worked up until layer:", i)
-            break
+    # for i in range(len(layer_arr)):
+    #     if layer_arr[i] == 0:
+    #         continue
+    #     else:
+    #         my_print(" This means your stitching (and route blockage) has worked up until layer:", i)
+    #         break
     my_print("Done checking route violations")
 my_print("Done checking")
 

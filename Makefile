@@ -7,16 +7,7 @@ VERILOG = output/s1494_postrouting.v
 YAML = blockages_definition.yaml 
 
 default:
-	@python3 a.py
-
-in:
-	@innovus -nowin < innovus_skeleton.tcl
-
-test:
-	@innovus -nowin < test.tcl
-
-test_py:
-	@python3 test.py
+	@python3 a.py 0.88
 
 info:
 	@echo "./$(PERF) $(VERILOG) $(YAML)" 

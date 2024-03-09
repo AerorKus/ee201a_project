@@ -15,3 +15,5 @@ placeblk
 design_file
 max_score
 score
+best_results/
+blockage.yaml

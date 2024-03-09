@@ -9,7 +9,7 @@
 # Setup design config
 set netlist 
 set top_cell 
-set sdc design.sdc
+set sdc 
 set lef NangateOpenCellLibrary.lef
 set DNAME design
 set OUTPUTDIR checker_output
@@ -33,12 +33,19 @@ set init_top_cell $top_cell
 set init_lef_file $lef
 set init_pwr_net VDD
 set init_gnd_net VSS
-source ./rc.mmode.tcl
+
+create_library_set -name default_library_set -timing ./NangateOpenCellLibrary_typical_conditional_nldm.lib
+create_rc_corner -name _default_rc_corner_ -T 25.0
+create_delay_corner -name _default_delay_corner_ -library_set default_library_set -opcond typical  -opcond_library NangateOpenCellLibrary -rc_corner _default_rc_corner_
+create_constraint_mode -name _default_constraint_mode_ -sdc_files $sdc
+ 
+create_analysis_view -name _default_view_  -constraint_mode _default_constraint_mode_ -delay_corner _default_delay_corner_
+ 
 init_design -setup _default_view_ -hold _default_view_
 setAnalysisMode -analysisType onChipVariation -cppr both
 setDesignMode -process 45
 
-restoreDesign [file dirname [file normalize [info script]]]/design_file.dat $top_cell
+restoreDesign design_file.dat $top_cell
 
 # Extract RC delays
 setExtractRCMode -engine postRoute

@@ -2,6 +2,8 @@ import sys
 import subprocess
 import os
 import time
+import shutil
+import yaml
 
 start = time.time() #start timer
 
@@ -42,7 +44,79 @@ if os.path.exists("placeblk"):
 else:
   f_placeblk = open("placeblk", "x")
 f_placeblk.close()
- 
+
+def save_best():
+  path = "best_results"
+  shutil.rmtree(path)
+  os.makedirs(path, exist_ok = True) 
+
+  source_dir = r"design_file.dat"
+  destination_dir = r"best_results/design_file.dat"
+  shutil.copytree(source_dir, destination_dir)
+
+  #generated def
+  src_path = r"output/fpu_postrouting.def"
+  dst_path = r"best_results/best_postrouting.def"
+  shutil.copy(src_path, dst_path)
+
+  #generated verilog
+  src_path = r"output/fpu_postrouting.v"
+  dst_path = r"best_results/best_postrouting.v"
+  shutil.copy(src_path, dst_path)
+
+  #lef
+  src_path = r"NangateOpenCellLibrary.lef"
+  dst_path = r"best_results/NangateOpenCellLibrary.lef"
+  shutil.copy(src_path, dst_path)
+
+  #gds
+  src_path = r"NangateOpenCellLibrary.gds"
+  dst_path = r"best_results/NangateOpenCellLibrary.gds"
+  shutil.copy(src_path, dst_path)
+
+  #blockage yaml
+  src_path = r"blockage.yaml"
+  dst_path = r"best_results/best_blockages.yaml"
+  shutil.copy(src_path, dst_path)
+
+def block_yaml():
+  with open("routeblk") as fp_setup:
+    data = fp_setup.readlines()
+    setup_data = data[0].split("\n")
+    print(setup_data[0])
+    routeblk_llx = setup_data[0]
+    setup_data = data[1].split("\n")
+    print(setup_data[0])
+    routeblk_lly = setup_data[0]
+    setup_data = data[2].split("\n")
+    print(setup_data[0])
+    routeblk_urx = setup_data[0]
+    setup_data = data[3].split("\n")
+    print(setup_data[0])
+    routeblk_ury = setup_data[0]
+
+
+  with open("placeblk") as fp_setup:
+      data = fp_setup.readlines()
+      setup_data = data[0].split("\n")
+      print(setup_data[0])
+      placeblk_llx = setup_data[0]
+      setup_data = data[1].split("\n")
+      print(setup_data[0])
+      placeblk_lly = setup_data[0]
+      setup_data = data[2].split("\n")
+      print(setup_data[0])
+      placeblk_urx = setup_data[0]
+      setup_data = data[3].split("\n")
+      print(setup_data[0])
+      placeblk_ury = setup_data[0]
+
+
+  pnr_blockage = { "place_blockage" : {"x1" : placeblk_llx , "x2" : placeblk_urx, "y1" : placeblk_lly, "y2" : placeblk_ury}, \
+  "route_blockage" : {"x1" : routeblk_llx , "x2" : routeblk_urx, "y1" : routeblk_lly, "y2" : routeblk_ury}}
+  with open('blockage.yaml', 'w') as outfile:
+      yaml.dump(pnr_blockage, outfile, sort_keys=False)
+
 def metal_layer(data):
     metal6 = (int(data) & 1) >> 0
     metal5 = (int(data) & 2) >> 1
@@ -67,11 +141,11 @@ def block_test(metal1, metal2, metal3, metal4, metal5, metal6):
     f_data.write(str(metal6) + '\n')
     f_data.close()
     position += 1 #detail of blk
-    done = subprocess.Popen([f"innovus -nowin < innovus_skeleton.tcl"], shell=True)
+    done = subprocess.Popen([f"innovus -nowin < innovus_skeleton_fpu.tcl"], shell=True)
     done.wait()
     print("done subprocess")
       
-    with open('output/s1494.drc.rpt') as fp_drc:
+    with open('output/fpu.drc.rpt') as fp_drc:
       if 'No DRC violations were found' in fp_drc.read():
         print("No DRC Violations")
         status_drc = 0
@@ -81,7 +155,7 @@ def block_test(metal1, metal2, metal3, metal4, metal5, metal6):
     with open("output/summary.rpt") as fp_summ:
         data = fp_summ.readlines()
 
-    with open("output/s1494_postrouting_setup.tarpt") as fp_setup:
+    with open("output/fpu_postrouting_setup.tarpt") as fp_setup:
         data_setup = fp_setup.readlines()
 
 
@@ -109,10 +183,10 @@ def block_test(metal1, metal2, metal3, metal4, metal5, metal6):
 
     #FOM
     #weight
-    alpha = 1
-    beta = 1
+    alpha = 1/5
+    beta = 100
     gamma = 1
-    sigma = 1
+    sigma = 1/10000
     epsilon = 1
     #figures
     layer_num = metal1 + metal2 + metal3 + metal4 + metal5 + metal6
@@ -138,7 +212,8 @@ def block_test(metal1, metal2, metal3, metal4, metal5, metal6):
       max_score_metal4 = metal4
       max_score_metal5 = metal5
       max_score_metal6 = metal6
-      
+      block_yaml()
+      save_best()
       f_max_score = open("max_score", "a")
       f_max_score.write(str(max_score) + '\n')
       f_max_score.close
@@ -150,8 +225,8 @@ def block_test(metal1, metal2, metal3, metal4, metal5, metal6):
     f_data.close()
     fp_drc.close()
     fp_summ.close()
-    done = subprocess.Popen([f"./clean.sh"], shell=True)
-    done.wait()
+    # done = subprocess.Popen([f"./clean.sh"], shell=True)
+    # done.wait()
     # done = subprocess.Popen([f"./clean_checkers.sh"], shell=True)
     # done.wait()
     #out of time 1hr 30mins
@@ -165,6 +240,24 @@ def block_test(metal1, metal2, metal3, metal4, metal5, metal6):
   return stop_time, max_score, max_score_position, max_score_metal1, max_score_metal2, max_score_metal3, max_score_metal4, max_score_metal5, max_score_metal6
 
 #main
+
+skeleton_path = "innovus_skeleton_fpu.tcl"
+
+if len(sys.argv) > 1:
+    NEW_UTIL = sys.argv[1]
+
+def replace_line(lines,line_no,new_line):
+    lines[line_no] = new_line
+    return lines
+
+with open(skeleton_path, 'r') as file:
+    lines = file.readlines()
+    lines = replace_line(lines, 61, f"set UTIL {NEW_UTIL}\n")
+
+with open(skeleton_path, 'w') as file:
+    file.writelines(lines)
+
+
 i = 31 #6 layers but not blocking metal1
 max_score = -10000
 while i > 0:
@@ -188,13 +281,10 @@ while i > 0:
     f_data.write(str(max_score_metal5) + '\n')
     f_data.write(str(max_score_metal6) + '\n')
     f_data.close()
+    #write to yaml
   i-=1
   print("max score = " + str(max_score))
   if(stop_time == 1):
     break
-
-done = subprocess.Popen([f"innovus -nowin < innovus_skeleton.tcl"], shell=True)
-done.wait()
-
 
 

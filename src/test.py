@@ -100,42 +100,42 @@ import yaml
 # with open('data.yaml', 'w') as outfile:
 #     yaml.dump(data, outfile, default_flow_style=False)
 
-with open("routeblk") as fp_setup:
-    data = fp_setup.readlines()
-    setup_data = data[0].split("\n")
-    print(setup_data[0])
-    routeblk_llx = setup_data[0]
-    setup_data = data[1].split("\n")
-    print(setup_data[0])
-    routeblk_lly = setup_data[0]
-    setup_data = data[2].split("\n")
-    print(setup_data[0])
-    routeblk_urx = setup_data[0]
-    setup_data = data[3].split("\n")
-    print(setup_data[0])
-    routeblk_ury = setup_data[0]
+# with open("routeblk") as fp_setup:
+#     data = fp_setup.readlines()
+#     setup_data = data[0].split("\n")
+#     print(setup_data[0])
+#     routeblk_llx = setup_data[0]
+#     setup_data = data[1].split("\n")
+#     print(setup_data[0])
+#     routeblk_lly = setup_data[0]
+#     setup_data = data[2].split("\n")
+#     print(setup_data[0])
+#     routeblk_urx = setup_data[0]
+#     setup_data = data[3].split("\n")
+#     print(setup_data[0])
+#     routeblk_ury = setup_data[0]
 
 
-with open("placeblk") as fp_setup:
-    data = fp_setup.readlines()
-    setup_data = data[0].split("\n")
-    print(setup_data[0])
-    placeblk_llx = setup_data[0]
-    setup_data = data[1].split("\n")
-    print(setup_data[0])
-    placeblk_lly = setup_data[0]
-    setup_data = data[2].split("\n")
-    print(setup_data[0])
-    placeblk_urx = setup_data[0]
-    setup_data = data[3].split("\n")
-    print(setup_data[0])
-    placeblk_ury = setup_data[0]
+# with open("placeblk") as fp_setup:
+#     data = fp_setup.readlines()
+#     setup_data = data[0].split("\n")
+#     print(setup_data[0])
+#     placeblk_llx = setup_data[0]
+#     setup_data = data[1].split("\n")
+#     print(setup_data[0])
+#     placeblk_lly = setup_data[0]
+#     setup_data = data[2].split("\n")
+#     print(setup_data[0])
+#     placeblk_urx = setup_data[0]
+#     setup_data = data[3].split("\n")
+#     print(setup_data[0])
+#     placeblk_ury = setup_data[0]
 
 
-pnr_blockage = { "place_blockage" : {"x1" : placeblk_llx , "x2" : placeblk_urx, "y1" : placeblk_lly, "y2" : placeblk_ury}, \
-"route_blockage" : {"x1" : routeblk_llx , "x2" : routeblk_urx, "y1" : routeblk_lly, "y2" : routeblk_ury}}
-with open('data.yaml', 'w') as outfile:
-    yaml.dump(pnr_blockage, outfile, sort_keys=False)
+# pnr_blockage = { "place_blockage" : {"x1" : placeblk_llx , "x2" : placeblk_urx, "y1" : placeblk_lly, "y2" : placeblk_ury}, \
+# "route_blockage" : {"x1" : routeblk_llx , "x2" : routeblk_urx, "y1" : routeblk_lly, "y2" : routeblk_ury}}
+# with open('data.yaml', 'w') as outfile:
+#     yaml.dump(pnr_blockage, outfile, sort_keys=False)
 
 
 # set fp_routeblk [open "routeblk" w+]
@@ -189,3 +189,50 @@ with open('data.yaml', 'w') as outfile:
 # shutil.copy(src_path, dst_path)
 
 
+# skeleton_path = "innovus_skeleton.tcl"
+
+# if len(sys.argv) > 1:
+#     NEW_UTIL = sys.argv[1]
+
+# def replace_line(lines,line_no,new_line):
+#     lines[line_no] = new_line
+#     return lines
+
+# with open(skeleton_path, 'r') as file:
+#     lines = file.readlines()
+#     lines = replace_line(lines, 50, f"set UTIL {NEW_UTIL}\n")
+
+# with open(skeleton_path, 'w') as file:
+#     file.writelines(lines)
+
+def block_yaml():
+  with open("routeblk") as fp_setup:
+    data = fp_setup.readlines()
+    setup_data = data[0].split("\n")
+    routeblk_llx = float(setup_data[0])
+    setup_data = data[1].split("\n")
+    routeblk_lly = float(setup_data[0])
+    setup_data = data[2].split("\n")
+    routeblk_urx = float(setup_data[0])
+    setup_data = data[3].split("\n")
+    routeblk_ury = float(setup_data[0])
+
+
+  with open("placeblk") as fp_setup:
+      data = fp_setup.readlines()
+      setup_data = data[0].split("\n")
+      placeblk_llx = float(setup_data[0])
+      setup_data = data[1].split("\n")
+      placeblk_lly = float(setup_data[0])
+      setup_data = data[2].split("\n")
+      placeblk_urx = float(setup_data[0])
+      setup_data = data[3].split("\n")
+      placeblk_ury = float(setup_data[0])
+
+
+  pnr_blockage = { "place_blockage" : {"x1" : placeblk_llx , "x2" : placeblk_urx, "y1" : placeblk_lly, "y2" : placeblk_ury}, \
+  "route_blockage" : {"x1" : routeblk_llx , "x2" : routeblk_urx, "y1" : routeblk_lly, "y2" : routeblk_ury}}
+  with open('blockage.yaml', 'w') as outfile:
+      yaml.dump(pnr_blockage, outfile, sort_keys=False)
+
+block_yaml()

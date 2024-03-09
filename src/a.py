@@ -5,6 +5,8 @@ import time
 import shutil
 import yaml
 
+os.chdir('../')
+
 start = time.time() #start timer
 
 if os.path.exists("data"):
@@ -83,33 +85,25 @@ def block_yaml():
   with open("routeblk") as fp_setup:
     data = fp_setup.readlines()
     setup_data = data[0].split("\n")
-    print(setup_data[0])
-    routeblk_llx = setup_data[0]
+    routeblk_llx = float(setup_data[0])
     setup_data = data[1].split("\n")
-    print(setup_data[0])
-    routeblk_lly = setup_data[0]
+    routeblk_lly = float(setup_data[0])
     setup_data = data[2].split("\n")
-    print(setup_data[0])
-    routeblk_urx = setup_data[0]
+    routeblk_urx = float(setup_data[0])
     setup_data = data[3].split("\n")
-    print(setup_data[0])
-    routeblk_ury = setup_data[0]
+    routeblk_ury = float(setup_data[0])
 
 
   with open("placeblk") as fp_setup:
       data = fp_setup.readlines()
       setup_data = data[0].split("\n")
-      print(setup_data[0])
-      placeblk_llx = setup_data[0]
+      placeblk_llx = float(setup_data[0])
       setup_data = data[1].split("\n")
-      print(setup_data[0])
-      placeblk_lly = setup_data[0]
+      placeblk_lly = float(setup_data[0])
       setup_data = data[2].split("\n")
-      print(setup_data[0])
-      placeblk_urx = setup_data[0]
+      placeblk_urx = float(setup_data[0])
       setup_data = data[3].split("\n")
-      print(setup_data[0])
-      placeblk_ury = setup_data[0]
+      placeblk_ury = float(setup_data[0])
 
 
   pnr_blockage = { "place_blockage" : {"x1" : placeblk_llx , "x2" : placeblk_urx, "y1" : placeblk_lly, "y2" : placeblk_ury}, \

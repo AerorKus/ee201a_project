@@ -59,7 +59,7 @@ report_timing -early -nworst  10 -net > ${OUTPUTDIR}/${DNAME}_init_hold.tarpt
 setMaxRouteLayer 6
 
 # Specify floorplan dimensions and placement utilization
-set UTIL 0.80
+set UTIL 0.88
 floorplan -r 1.0 $UTIL 6 6 6 6
 
 #blockages

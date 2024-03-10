@@ -14,13 +14,13 @@ set lef NangateOpenCellLibrary.lef
 set DNAME design
 set OUTPUTDIR checker_output
 
-set x1_r 59.768
+set x1_r 73.3283
 set y1_r 0.0
-set x2_r 60.768
+set x2_r 74.3283
 set y2_r 149.24
-set x1_p 59.768
+set x1_p 73.3283
 set y1_p 6.02
-set x2_p 60.768
+set x2_p 74.3283
 set y2_p 143.22
 
 # Initialize design

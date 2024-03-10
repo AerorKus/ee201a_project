@@ -13,5 +13,6 @@ info:
 	@echo "./$(PERF) $(VERILOG) $(YAML)" 
 
 clean:
-	@./clean.sh
-	@./clean_checkers.sh
+	./clean_checkers.sh
+	./clean.sh
+	

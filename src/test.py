@@ -2,7 +2,8 @@ import sys
 import subprocess
 import os
 import time
-
+import shutil
+import yaml
 
 # start = time.time()
 # print("hello")
@@ -205,34 +206,84 @@ import yaml
 # with open(skeleton_path, 'w') as file:
 #     file.writelines(lines)
 
-def block_yaml():
-  with open("routeblk") as fp_setup:
-    data = fp_setup.readlines()
-    setup_data = data[0].split("\n")
-    routeblk_llx = float(setup_data[0])
-    setup_data = data[1].split("\n")
-    routeblk_lly = float(setup_data[0])
-    setup_data = data[2].split("\n")
-    routeblk_urx = float(setup_data[0])
-    setup_data = data[3].split("\n")
-    routeblk_ury = float(setup_data[0])
+# def block_yaml():
+#   with open("routeblk") as fp_setup:
+#     data = fp_setup.readlines()
+#     setup_data = data[0].split("\n")
+#     routeblk_llx = float(setup_data[0])
+#     setup_data = data[1].split("\n")
+#     routeblk_lly = float(setup_data[0])
+#     setup_data = data[2].split("\n")
+#     routeblk_urx = float(setup_data[0])
+#     setup_data = data[3].split("\n")
+#     routeblk_ury = float(setup_data[0])
 
 
-  with open("placeblk") as fp_setup:
-      data = fp_setup.readlines()
-      setup_data = data[0].split("\n")
-      placeblk_llx = float(setup_data[0])
-      setup_data = data[1].split("\n")
-      placeblk_lly = float(setup_data[0])
-      setup_data = data[2].split("\n")
-      placeblk_urx = float(setup_data[0])
-      setup_data = data[3].split("\n")
-      placeblk_ury = float(setup_data[0])
+#   with open("placeblk") as fp_setup:
+#       data = fp_setup.readlines()
+#       setup_data = data[0].split("\n")
+#       placeblk_llx = float(setup_data[0])
+#       setup_data = data[1].split("\n")
+#       placeblk_lly = float(setup_data[0])
+#       setup_data = data[2].split("\n")
+#       placeblk_urx = float(setup_data[0])
+#       setup_data = data[3].split("\n")
+#       placeblk_ury = float(setup_data[0])
 
 
-  pnr_blockage = { "place_blockage" : {"x1" : placeblk_llx , "x2" : placeblk_urx, "y1" : placeblk_lly, "y2" : placeblk_ury}, \
-  "route_blockage" : {"x1" : routeblk_llx , "x2" : routeblk_urx, "y1" : routeblk_lly, "y2" : routeblk_ury}}
-  with open('blockage.yaml', 'w') as outfile:
-      yaml.dump(pnr_blockage, outfile, sort_keys=False)
+#   pnr_blockage = { "place_blockage" : {"x1" : placeblk_llx , "x2" : placeblk_urx, "y1" : placeblk_lly, "y2" : placeblk_ury}, \
+#   "route_blockage" : {"x1" : routeblk_llx , "x2" : routeblk_urx, "y1" : routeblk_lly, "y2" : routeblk_ury}}
+#   with open('blockage.yaml', 'w') as outfile:
+#       yaml.dump(pnr_blockage, outfile, sort_keys=False)
 
-block_yaml()
+# block_yaml()
+
+# checker_command = 'python3 ./checkers/combined_checker.py output/fpu_postrouting.v blockage.yaml'
+# done = subprocess.Popen([checker_command], shell=True)
+# done.wait()
+# print("done subprocess")
+
+
+# with open("combined_checker_output.txt") as f_checker:
+#     if ' No place violations found' in f_checker.read():
+#         success_place = 1
+#     else:
+#         success_place = 0
+# print(success_place)
+
+# with open("combined_checker_output.txt") as f_checker:
+#     if ' No route violations found' in f_checker.read():
+#         success_route = 1
+#     else:
+#         success_route = 0
+# print(success_route)
+
+# with open("combined_checker_output.txt") as f_checker:
+#     data = f_checker.readlines()
+#     for setup_slack in data:
+#         if (setup_slack.startswith(" No setup timing violations found. Setup Slack:")):
+#             setup_slack_data_temp = setup_slack.split(": ")
+#             setup_slack_data = setup_slack_data_temp[1].split("\n")
+#             print(setup_slack_data[0])
+#     for drc_errors in data:
+#         if (drc_errors.startswith("Checking DRC errors...")):
+#             continue
+#         if (drc_errors.startswith(" Total Violations :")):
+#             drc_errors_data_temp = drc_errors.split(": ")
+#             drc_errors_data = drc_errors_data_temp[1].split(" Viols.")
+#             print(drc_errors_data[0])
+#     for area in data:
+#         if (area.startswith(" Core area:")):
+#             area_data_temp = area.split(": ")
+#             area_data = area_data_temp[1].split(" um^2")
+#             print(area_data[0])
+#     for twl in data:
+#         if (twl.startswith(" Total wire length:")):
+#             twl_data_temp = twl.split(": ")
+#             twl_data = twl_data_temp[1].split(" um")
+#             print(twl_data[0])
+
+path = "best_results"
+if os.path.exists(path):
+    shutil.rmtree(path)
+os.makedirs(path, exist_ok = True) 

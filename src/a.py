@@ -5,8 +5,6 @@ import time
 import shutil
 import yaml
 
-os.chdir('../')
-
 start = time.time() #start timer
 
 if os.path.exists("data"):
@@ -22,9 +20,7 @@ if os.path.exists("score"):
 else:
   f_score = open("score", "x")
 f_score.close()
-f_score = open("score", "w")
-f_score.write("Score\n")
-f_score.close()
+
 
 if os.path.exists("max_score"):
   os.remove("max_score")
@@ -48,8 +44,10 @@ else:
 f_placeblk.close()
 
 def save_best():
+  
   path = "best_results"
-  shutil.rmtree(path)
+  if os.path.exists(path):
+      shutil.rmtree(path)
   os.makedirs(path, exist_ok = True) 
 
   source_dir = r"design_file.dat"
@@ -109,7 +107,7 @@ def block_yaml():
   pnr_blockage = { "place_blockage" : {"x1" : placeblk_llx , "x2" : placeblk_urx, "y1" : placeblk_lly, "y2" : placeblk_ury}, \
   "route_blockage" : {"x1" : routeblk_llx , "x2" : routeblk_urx, "y1" : routeblk_lly, "y2" : routeblk_ury}}
   with open('blockage.yaml', 'w') as outfile:
-      yaml.dump(pnr_blockage, outfile, sort_keys=False)
+    yaml.dump(pnr_blockage, outfile, sort_keys=False)
 
 def metal_layer(data):
     metal6 = (int(data) & 1) >> 0
@@ -121,9 +119,8 @@ def metal_layer(data):
     return metal1, metal2, metal3, metal4, metal5, metal6
 
 
-def block_test(metal1, metal2, metal3, metal4, metal5, metal6):
+def block_test(metal1, metal2, metal3, metal4, metal5, metal6, max_score):
   position = 40
-  max_score = -10000
   while position <= 60:
     f_data = open("data", "w")
     f_data.write(str(position) + '\n')
@@ -138,67 +135,85 @@ def block_test(metal1, metal2, metal3, metal4, metal5, metal6):
     done = subprocess.Popen([f"innovus -nowin < innovus_skeleton_fpu.tcl"], shell=True)
     done.wait()
     print("done subprocess")
-      
-    with open('output/fpu.drc.rpt') as fp_drc:
-      if 'No DRC violations were found' in fp_drc.read():
-        print("No DRC Violations")
-        status_drc = 0
-      else:
-        status_drc = 1 
-      
-    with open("output/summary.rpt") as fp_summ:
-        data = fp_summ.readlines()
+    
+    block_yaml()
 
-    with open("output/fpu_postrouting_setup.tarpt") as fp_setup:
-        data_setup = fp_setup.readlines()
+    checker_command = 'python3 ./checkers/combined_checker.py output/fpu_postrouting.v blockage.yaml'
+    done = subprocess.Popen([checker_command], shell=True)
+    done.wait()
+    print("done subprocess")
 
+    with open("combined_checker_output.txt") as f_checker:
+        if ' No place violations found' in f_checker.read():
+            success_place = 1
+        else:
+            success_place = 0
+    print(success_place)
 
-    #Total Wire Length
-    for twl_str in data:
-      if (twl_str.startswith("Total wire length:")):
-        twl_data_tmp = twl_str.split(": ")
-        twl_data = twl_data_tmp[1].split(" um")
-        print(twl_data[0])
+    with open("combined_checker_output.txt") as f_checker:
+        if ' No route violations found' in f_checker.read():
+            success_route = 1
+        else:
+            success_route = 0
+    print(success_route)
 
-    # Core Density    
-    for area_str in data:
-      if (area_str.startswith("% Core Density #2(Subtracting Physical Cells): ")):
-        area_data_tmp = area_str.split(": ")
-        area_data = area_data_tmp[1].split("%")
-        print(area_data[0])
-    #setup slack
-
-    for setup_str in data_setup:
-      if (setup_str.startswith("= Slack Time                    ")):
-        setup_data_temp= setup_str.split("                    ")
-        setup_data = setup_data_temp[1].split("\n")
-        print(setup_data[0])
-        break
+    with open("combined_checker_output.txt") as f_checker:
+        data = f_checker.readlines()
+        for setup_slack in data:
+            if (setup_slack.startswith(" No setup timing violations found. Setup Slack:")):
+                setup_data_temp = setup_slack.split(": ")
+                setup_data = setup_data_temp[1].split("\n")
+                print(setup_data[0])
+        for drc_errors in data:
+            if (drc_errors.startswith("Checking DRC errors...")):
+                continue
+            if (drc_errors.startswith(" Total Violations :")):
+                drc_errors_data_temp = drc_errors.split(": ")
+                drc_errors_data = drc_errors_data_temp[1].split(" Viols.")
+                print(drc_errors_data[0])
+        for area in data:
+            if (area.startswith(" Core area:")):
+                area_data_temp = area.split(": ")
+                area_data = area_data_temp[1].split(" um^2")
+                print(area_data[0])
+        for twl in data:
+            if (twl.startswith(" Total wire length:")):
+                twl_data_temp = twl.split(": ")
+                twl_data = twl_data_temp[1].split(" um")
+                print(twl_data[0])
+        
 
     #FOM
     #weight
-    alpha = 1/5
-    beta = 100
-    gamma = 1
-    sigma = 1/10000
-    epsilon = 1
+    alpha = 1
+    beta = 13
+    gamma = 0.15
+    sigma = 0.0001
+    epsilon = 3
     #figures
+    basetwl = 98000
+    basedrc = 7
     layer_num = metal1 + metal2 + metal3 + metal4 + metal5 + metal6
     setup_slack = float(setup_data[0])
     twl = float(twl_data[0])
-    drc_violation = status_drc
-    success_place = 1
+    drc_violation = float(drc_errors_data[0])
 
-    score = alpha*layer_num + beta*setup_slack - gamma*drc_violation - sigma*twl + epsilon*success_place
+
+    score = alpha*layer_num + beta*setup_slack - gamma*(drc_violation-basedrc) - sigma*(twl-basetwl) + epsilon*success_place
     end = time.time()
     time_elapsed = end - start
-    print("score FOM" + str(score))
+    print("score FOM: " + str(score))
     f_score = open("score", "a")
     f_score.write(str(time_elapsed) + ": " + "Score = " + str(score) + '\n')
+    f_score.flush()
     f_score.close
     
     if(score > max_score):
+      print("max score" + str(score) + " > " + "max score" + str(max_score) + "\n")
       max_score = score
+      print("afterwards\n")
+      print("max score" + str(score) + " > " + "max score" + str(max_score) + "\n")
+      
       max_score_position = position
       max_score_metal1 = metal1
       max_score_metal2 = metal2
@@ -206,10 +221,10 @@ def block_test(metal1, metal2, metal3, metal4, metal5, metal6):
       max_score_metal4 = metal4
       max_score_metal5 = metal5
       max_score_metal6 = metal6
-      block_yaml()
       save_best()
       f_max_score = open("max_score", "a")
       f_max_score.write(str(max_score) + '\n')
+      f_max_score.flush()
       f_max_score.close
     
     # end of function
@@ -217,15 +232,16 @@ def block_test(metal1, metal2, metal3, metal4, metal5, metal6):
     f_data.truncate(0)
     f_data.seek(0)
     f_data.close()
-    fp_drc.close()
-    fp_summ.close()
-    # done = subprocess.Popen([f"./clean.sh"], shell=True)
-    # done.wait()
-    # done = subprocess.Popen([f"./clean_checkers.sh"], shell=True)
-    # done.wait()
+    f_checker.close()
+
+    done = subprocess.Popen([f"./clean.sh"], shell=True)
+    done.wait()
+    done = subprocess.Popen([f"./clean_checkers.sh"], shell=True)
+    done.wait()
+
     #out of time 1hr 30mins
     # if(time_elapsed > 5000):
-    if(time_elapsed > 60):
+    if(time_elapsed > 5400):
       print("time_elapsed = " + str(end-start) + "s")
       stop_time = 1
       return stop_time, max_score, max_score_position, max_score_metal1, max_score_metal2, max_score_metal3, max_score_metal4, max_score_metal5, max_score_metal6
@@ -256,26 +272,9 @@ i = 31 #6 layers but not blocking metal1
 max_score = -10000
 while i > 0:
   metal1, metal2, metal3, metal4, metal5, metal6 = metal_layer(i)
-  stop_time, score, score_position, score_metal1, score_metal2, score_metal3, score_metal4, score_metal5, score_metal6 = block_test(metal1, metal2, metal3, metal4, metal5, metal6)
+  stop_time, score, score_position, score_metal1, score_metal2, score_metal3, score_metal4, score_metal5, score_metal6 = block_test(metal1, metal2, metal3, metal4, metal5, metal6, max_score)
   if(score > max_score):
     max_score = score
-    max_score_position = score_position
-    max_score_metal1 = score_metal1
-    max_score_metal2 = score_metal2
-    max_score_metal3 = score_metal3
-    max_score_metal4 = score_metal4
-    max_score_metal5 = score_metal5
-    max_score_metal6 = score_metal6
-    f_data = open("data", "w")
-    f_data.write(str(max_score_position) + '\n')
-    f_data.write(str(max_score_metal1) + '\n')
-    f_data.write(str(max_score_metal2) + '\n')
-    f_data.write(str(max_score_metal3) + '\n')
-    f_data.write(str(max_score_metal4) + '\n')
-    f_data.write(str(max_score_metal5) + '\n')
-    f_data.write(str(max_score_metal6) + '\n')
-    f_data.close()
-    #write to yaml
   i-=1
   print("max score = " + str(max_score))
   if(stop_time == 1):

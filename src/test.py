@@ -86,8 +86,6 @@ import yaml
 # done.wait()
 # print("done")
 
-
-import yaml
 # data_a = 1
 # data = dict(
 #     A = data_a,
@@ -283,7 +281,19 @@ import yaml
 #             twl_data = twl_data_temp[1].split(" um")
 #             print(twl_data[0])
 
-path = "best_results"
-if os.path.exists(path):
-    shutil.rmtree(path)
-os.makedirs(path, exist_ok = True) 
+# path = "best_results"
+# if os.path.exists(path):
+#     shutil.rmtree(path)
+# os.makedirs(path, exist_ok = True) 
+
+# thislist = [45, 50, 60]
+# for x in thislist:
+#   print(x + 1)
+
+# best_verilog: "best_results/best_postrouting.v"
+# best_blockages: "best_results/best_blockages.yaml"
+# best_design_dat_folder: "best_results/design_file.dat"
+# best_def: "best_results/best_postrouting.def"
+# best_lef: "best_results/NangateOpenCellLibrary.lef"
+# best_gds: "best_results/NangateOpenCellLibrary.gds"
+

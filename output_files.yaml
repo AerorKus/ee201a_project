@@ -1,13 +1,6 @@
-# example output file
-# your script needs to generate this file.
-# Alternatively, keep this file fixed and update the output files themselves in your script
-# these filepaths are relative to the project root.
-# DO NOT CHANGE THE KEYS OR SYNTAX
-
-best_verilog: "best_results/best_postrouting.v"
-best_blockages: "best_results/best_blockages.yaml"
-best_design_dat_folder: "best_results/design_file.dat"
-best_def: "best_results/best_postrouting.def"
-best_lef: "best_results/NangateOpenCellLibrary.lef"
-best_gds: "best_results/NangateOpenCellLibrary.gds"
-
+best_verilog: best_results/best_postrouting.v
+best_blockages: best_results/best_blockages.yaml
+best_design_dat_folder: best_results/design_file.dat
+best_def: best_results/best_postrouting.def
+best_lef: best_results/NangateOpenCellLibrary.lef
+best_gds: best_results/NangateOpenCellLibrary.gds

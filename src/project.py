@@ -120,8 +120,8 @@ def metal_layer(data):
 
 
 def block_test(metal1, metal2, metal3, metal4, metal5, metal6, max_score):
-  position = 40
-  while position <= 60:
+  position_options = [45, 50, 55]
+  for position in position_options:
     f_data = open("data", "w")
     f_data.write(str(position) + '\n')
     f_data.write(str(metal1) + '\n')
@@ -131,7 +131,7 @@ def block_test(metal1, metal2, metal3, metal4, metal5, metal6, max_score):
     f_data.write(str(metal5) + '\n')
     f_data.write(str(metal6) + '\n')
     f_data.close()
-    position += 1 #detail of blk
+
     done = subprocess.Popen([f"innovus -nowin < innovus_skeleton_fpu.tcl"], shell=True)
     done.wait()
     print("done subprocess")
@@ -187,12 +187,12 @@ def block_test(metal1, metal2, metal3, metal4, metal5, metal6, max_score):
     #weight
     alpha = 1
     beta = 13
-    gamma = 0.15
+    gamma = 0.075
     sigma = 0.0001
     epsilon = 3
     #figures
     basetwl = 98000
-    basedrc = 7
+    basedrc = 11
     layer_num = metal1 + metal2 + metal3 + metal4 + metal5 + metal6
     setup_slack = float(setup_data[0])
     twl = float(twl_data[0])
@@ -204,23 +204,15 @@ def block_test(metal1, metal2, metal3, metal4, metal5, metal6, max_score):
     time_elapsed = end - start
     print("score FOM: " + str(score))
     f_score = open("score", "a")
-    f_score.write(str(time_elapsed) + ": " + "Score = " + str(score) + '\n')
+    f_score.write("Time = " + str(time_elapsed) + ": " + "Score = " + str(score) + '\n'\
+                  "position = " + str(position) + "; metal1 = " + str(metal1) + "; metal2 = " + str(metal2) + "; metal3 = " + str(metal3) + "; metal4 = " + str(metal4) + "; metal5 = " + str(metal5) + "; metal6 = " + str(metal6) + '\n'  + '\n')
     f_score.flush()
     f_score.close
     
+    
     if(score > max_score):
-      print("max score" + str(score) + " > " + "max score" + str(max_score) + "\n")
+      print("score " + str(score) + " > " + "max score " + str(max_score) + "\n")
       max_score = score
-      print("afterwards\n")
-      print("max score" + str(score) + " > " + "max score" + str(max_score) + "\n")
-      
-      max_score_position = position
-      max_score_metal1 = metal1
-      max_score_metal2 = metal2
-      max_score_metal3 = metal3
-      max_score_metal4 = metal4
-      max_score_metal5 = metal5
-      max_score_metal6 = metal6
       save_best()
       f_max_score = open("max_score", "a")
       f_max_score.write(str(max_score) + '\n')
@@ -240,14 +232,13 @@ def block_test(metal1, metal2, metal3, metal4, metal5, metal6, max_score):
     done.wait()
 
     #out of time 1hr 30mins
-    # if(time_elapsed > 5000):
     if(time_elapsed > 5400):
       print("time_elapsed = " + str(end-start) + "s")
       stop_time = 1
-      return stop_time, max_score, max_score_position, max_score_metal1, max_score_metal2, max_score_metal3, max_score_metal4, max_score_metal5, max_score_metal6
+      return stop_time, max_score
     else:
       stop_time = 0
-  return stop_time, max_score, max_score_position, max_score_metal1, max_score_metal2, max_score_metal3, max_score_metal4, max_score_metal5, max_score_metal6
+  return stop_time, max_score
 
 #main
 
@@ -267,12 +258,23 @@ with open(skeleton_path, 'r') as file:
 with open(skeleton_path, 'w') as file:
     file.writelines(lines)
 
+#creates output_files.yaml, doesnt change
+output_yaml = { "best_verilog" : "best_results/best_postrouting.v", \
+"best_blockages" : "best_results/best_blockages.yaml", \
+"best_design_dat_folder" : "best_results/design_file.dat", \
+"best_def" : "best_results/best_postrouting.def", \
+"best_lef" : "best_results/NangateOpenCellLibrary.lef", \
+"best_gds" : "best_results/NangateOpenCellLibrary.gds", \
+    }
+with open('output_files.yaml', 'w') as outfile:
+    yaml.dump(output_yaml, outfile, sort_keys=False)
+
 
 i = 31 #6 layers but not blocking metal1
-max_score = -10000
+max_score = 0
 while i > 0:
   metal1, metal2, metal3, metal4, metal5, metal6 = metal_layer(i)
-  stop_time, score, score_position, score_metal1, score_metal2, score_metal3, score_metal4, score_metal5, score_metal6 = block_test(metal1, metal2, metal3, metal4, metal5, metal6, max_score)
+  stop_time, score = block_test(metal1, metal2, metal3, metal4, metal5, metal6, max_score)
   if(score > max_score):
     max_score = score
   i-=1

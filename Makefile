@@ -7,7 +7,7 @@ VERILOG = output/s1494_postrouting.v
 YAML = blockages_definition.yaml 
 
 default:
-	@python3 src/a.py 0.88
+	@python3 src/project.py 0.88
 
 info:
 	@echo "./$(PERF) $(VERILOG) $(YAML)" 

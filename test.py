@@ -290,10 +290,12 @@ import yaml
 # for x in thislist:
 #   print(x + 1)
 
-# best_verilog: "best_results/best_postrouting.v"
-# best_blockages: "best_results/best_blockages.yaml"
-# best_design_dat_folder: "best_results/design_file.dat"
-# best_def: "best_results/best_postrouting.def"
-# best_lef: "best_results/NangateOpenCellLibrary.lef"
-# best_gds: "best_results/NangateOpenCellLibrary.gds"
-
+output_yaml = { "best_verilog" : str("best_results/best_postrouting.v"), \
+"best_blockages" : "best_results/best_blockages.yaml", \
+"best_design_dat_folder" : "best_results/design_file.dat", \
+"best_def" : "best_results/best_postrouting.def", \
+"best_lef" : "best_results/NangateOpenCellLibrary.lef", \
+"best_gds" : "best_results/NangateOpenCellLibrary.gds", \
+    }
+with open('output_files.yaml', 'w') as outfile:
+    yaml.dump(output_yaml, outfile, sort_keys=False)

@@ -1,0 +1,39 @@
+#!/bin/csh
+# Last updated 02/10/2018 for EE 201A Winter 2021
+#
+# Source this script if you are using csh for EE 201A on eeapps.seas.ucla.edu as follows:
+# $ source csh_ee201a_setup
+
+# For Cadence 
+source /w/apps3/Cadence/INNOVUS161/SETUP
+source /w/apps3/Cadence/GENUS191/SETUP
+
+#Gives Permission denied.
+# source /w/apps3/Mentor/Calibre/v2016.2_26.21/SETUP 
+# This works instead v v v
+source /w/apps3/Mentor/Calibre/v2021.1_16.10/SETUP
+
+# Add Conformal bin
+setenv PATH "/w/apps3/Cadence/CONFRML171/bin:{$PATH}"
+
+# Append OpenAccess binaries to executable path
+setenv PATH "/w/class.1/ee/ee201a/ee201ata/oa/bin/linux_rhel40_64/opt:{$PATH}"
+# setenv PATH "/w/class.1/ee/ee201o/ee201ota/oa/bin:{$PATH}"
+setenv OA_PLUGIN_PATH /w/class.1/ee/ee201a/ee201ata/oa/data/plugins
+# Append OpenAccess libraries to load path
+if ($?LD_LIBRARY_PATH == 0) then
+	setenv LD_LIBRARY_PATH /w/class.1/ee/ee201a/ee201ata/oa/lib/linux_rhel40_64/opt
+else
+	setenv LD_LIBRARY_PATH "/w/class.1/ee/ee201a/ee201ata/oa/lib/linux_rhel40_64/opt:{$LD_LIBRARY_PATH}"
+endif
+
+# For OpenAccess Makefiles
+setenv COMPILER_PATH /usr
+
+# Append standard library locations
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/usr/lib64:/usr/lib:/lib64:/lib
+
+#Adding scons
+setenv PATH ${PATH}:/w/class.1/ee/ee201a/ee201ata/scons-3.1.2/bin
+
+setenv PRJ_SRC 1

@@ -1,0 +1,30 @@
+# this YAML file contains the definition of the blockages for the project
+# you need to populate this file and feed it to the bounds checker to ensure your blockages have been honoured by Innovus.
+# we will use this file and the bounds checker to verify your blockages.
+# We recommend you find a way to automatically generate this file as part of your workflow.
+# You can then use the bounds checker to verify your blockages at any time as part of your search space exploration.
+
+# the blockages are defined as a list of dictionaries, each dictionary contains the following keys:
+# - x1: the x1 coordinate of the blockage
+# - y1: the y1 coordinate of the blockage
+# - x2: the x2 coordinate of the blockage
+# - y2: the y2 coordinate of the blockage
+# example blockages listed below. You should replace these coordinates with the ones you are using.
+place_blockage: [
+    {
+        "x1": 0
+        "y1": 0
+        "x2": 25
+        "y2": 25
+    }
+]
+route_blockage: [
+    {
+        "x1": 0
+        "y1": 0
+        "x2": 50
+        "y2": 50
+    }
+]
+# the two blockages should be in roughly the same place. The route blockage should however extend to the boundaries of the design area.
+# the place blockage should only extend through to the boundaries of the core area.
